@@ -51,7 +51,7 @@ python scripts/demo_inference.py --cfg configs/halpe_coco_wholebody_136/resnet/2
 
 model here is [Fast Pose (DCN)](https://github.com/MVIG-SJTU/AlphaPose/blob/master/docs/MODEL_ZOO.md#multi-domain-models-strongly-recommended), expecting around 10 fps. Other models available at [here](https://github.com/MVIG-SJTU/AlphaPose/blob/master/docs/MODEL_ZOO.md)
 
-in `--webcam` parameter, 
+in `--webcam` parameter can choose the streaming by
 
 |id|camera|
 |:---:|:----:|
