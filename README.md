@@ -1,10 +1,42 @@
 # PointAndMnipulate
-Manipulate robot arm with pointing gesture. 
+## Manipulate robot arm with pointing gesture. 
 
-Same idea as ICRA2022: Augmenteted Pointing Gesture Estimation for Human-Robot Interaction 
+Similar idea as ICRA2022: Augmenteted Pointing Gesture Estimation for Human-Robot Interaction 
 
 LINK: https://ieeexplore.ieee.org/abstract/document/9811617
 
-\title
+## Ideas
+the paper above use the direction of forearm as the poiting direction, but a pointing happens when we look at something and finger tip at it. It means the direction of forearm may not be the most ituitive way to represent a pointing action especially when the arm is not fully stretched out. Out sight should be the reference which is a line going through our eyes and finger tip. 
 
+## Problem
+~~?eye recognition~~
+
+hard to locate the hand when arm is not fully streched out because there may be a lot of obstruction.
+
+precision is also a problem since 2 points(eye and fingertip) stays not far enough in this situation for a distance from camera to people(under 2m) which means a small difference in coordinate brings a big difference in angle change.
+
+
+## Steps
+### Pose estimation
+  - [x]human pose estimation: arm and eyes center(midpoint of two eyes)
+  
+    on going:
+    
+      AlphaPose: https://github.com/MVIG-SJTU/AlphaPose
+      
+      Model: 
+      
+  - [ ]hand pose estimation: considering which to be the end point of the sight line
+  
+### Pointing estimation
+transform keypoints in image frame(in camera) to world frame
+  - [ ]coordinates transform
+    - [ ]hand-eye calibration
+    - [ ]jittering optimization(depends on performance)
+    - [ ]compensation(optional)
+    
+### Interacton design
+after getting the pointing position/line of sight, how do we interact with the arm? 
+- projection on X-Y plane and see what is there and how can we interact/manipulate
+- collision checking: line of sight and object in the workspace then interact
 
