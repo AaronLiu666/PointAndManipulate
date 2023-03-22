@@ -168,8 +168,8 @@ def get_install_requires():
         'munkres', 'timm==0.1.20', 'natsort'
     ]
     # official pycocotools doesn't support Windows, we will install it by third-party git repository later
-    if platform.system() != 'Windows':
-        install_requires.append('pycocotools')
+    # if platform.system() != 'Windows':
+    #     install_requires.append('pycocotools')
     return install_requires
 
 
