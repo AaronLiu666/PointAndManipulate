@@ -58,5 +58,4 @@ in `--webcam` parameter can choose the streaming by
 |0|webcam on laptop|
 |5|depth or stereo of D435i|
 |6|color of D435i|
-||| 
 
