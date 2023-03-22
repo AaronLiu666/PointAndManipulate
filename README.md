@@ -40,5 +40,22 @@ after getting the pointing position/line of sight, how do we interact with the a
 - projection on X-Y plane and see what is there and how can we interact/manipulate
 - collision checking: line of sight and object in the workspace then interact
 
-test push
+### Updates
 
+2022.3.22
+
+running :
+```bash
+python scripts/demo_inference.py --cfg configs/halpe_coco_wholebody_136/resnet/256x192_res50_lr1e-3_2x-dcn-combined.yaml --checkpoint pretrained_models/multi_domain_fast50_dcn_combined_256x192.pth --vis --webcam 6
+```
+
+model here is [Fast Pose (DCN)](https://github.com/MVIG-SJTU/AlphaPose/blob/master/docs/MODEL_ZOO.md#multi-domain-models-strongly-recommended), expecting around 10 fps. Other models available at [here](https://github.com/MVIG-SJTU/AlphaPose/blob/master/docs/MODEL_ZOO.md)
+
+in `--webcam` parameter, 
+
+|id|camera|
+|:---:|:----:|
+|0|webcam on laptop|
+|5|depth or stereo of D435i|
+|6|color of D435i|
+||| 
