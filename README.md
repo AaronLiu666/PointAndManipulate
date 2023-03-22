@@ -1,4 +1,4 @@
-# PointAndMnipulate
+# PointAndManipulate
 ## Manipulate robot arm with pointing gesture. 
 
 Similar idea as ICRA2022: Augmenteted Pointing Gesture Estimation for Human-Robot Interaction 
