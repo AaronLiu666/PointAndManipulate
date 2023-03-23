@@ -28,6 +28,10 @@ precision is also a problem since 2 points(eye and fingertip) stays not far enou
       
       Config: configs/halpe_coco_wholebody_136/resnet/256x192_res50_lr1e-3_2x-dcn-combined.yaml
       
+      Parameters/flags: https://github.com/MVIG-SJTU/AlphaPose/blob/master/docs/run.md
+      
+      Output Format: https://github.com/MVIG-SJTU/AlphaPose/blob/master/docs/output.md
+      
   - [ ]hand pose estimation: considering which to be the end point of the sight line
   
 ### Pointing estimation
