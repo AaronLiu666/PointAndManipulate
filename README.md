@@ -46,7 +46,7 @@ after getting the pointing position/line of sight, how do we interact with the a
 - projection on X-Y plane and see what is there and how can we interact/manipulate
 - collision checking: line of sight and object in the workspace then interact
 
-## Updates
+## Progress
 
 2022.3.22
 
@@ -68,6 +68,12 @@ in `--webcam` parameter can choose the streaming by
 
 2022.3.23
 
-zhiyuan: gesture guided pick-and-place
+zhiyuan: gesture guided pick-and-place {learning from demonstration}
 
 use hand orientation to clarify the action
+
+error: when using a `.mp4 ` file as input, the batch size(default 5) should be smaller to prevent crashing, setting to 1 can work
+
+```bash
+ python scripts/demo_inference.py --cfg configs/halpe_coco_wholebody_136/resnet/256x192_res50_lr1e-3_2x-dcn-combined.yaml --checkpoint pretrained_models/multi_domain_fast50_dcn_combined_256x192.pth --video examples/demo/bsktb.mp4 --outdir examples/res/ --save_video --detbatch 1
+```
