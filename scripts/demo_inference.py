@@ -206,8 +206,10 @@ if __name__ == "__main__":
             video_save_opt['savepath'] = os.path.join(args.outputpath, 'AlphaPose_webcam' + str(input_source) + '.mp4')
         video_save_opt.update(det_loader.videoinfo)
         writer = DataWriter(cfg, args, save_video=True, video_save_opt=video_save_opt, queueSize=queueSize).start()
+        # print('if')
     else:
-        writer = DataWriter(cfg, args, save_video=False, queueSize=queueSize).start()
+        writer = DataWriter(cfg, args, save_video=False, queueSize=queueSize).start() # no save path in webcam 
+        print('data writer for image input or webcam mode')
 
     if mode == 'webcam':
         print('Starting webcam demo, press Ctrl + C to terminate...')
@@ -261,6 +263,8 @@ if __name__ == "__main__":
                 if args.profile:
                     ckpt_time, post_time = getTime(ckpt_time)
                     runtime_profile['pn'].append(post_time)
+                print(hm.shape)
+                print(hm[0,0,0,:])
 
             if args.profile:
                 # TQDM
