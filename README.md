@@ -97,3 +97,8 @@ nvidia-smi
 ```
 
 kill all unnecessary PID process
+
+```
+watch -n 0.1 -d nvidia-smi #每隔0.1秒刷新一次
+```
+
