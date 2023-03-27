@@ -260,11 +260,14 @@ if __name__ == "__main__":
                     boxes,scores,ids,hm,cropped_boxes = track(tracker,args,orig_img,inps,boxes,hm,cropped_boxes,im_name,scores)
                 hm = hm.cpu()
                 writer.save(boxes, scores, ids, hm, cropped_boxes, orig_img, im_name)
+                # writer.results()
+                print('called saved')
+                # print(writer.results)
                 if args.profile:
                     ckpt_time, post_time = getTime(ckpt_time)
                     runtime_profile['pn'].append(post_time)
-                print(hm.shape)
-                print(hm[0,0,0,:])
+                # print(hm.shape)
+                # print(hm[0,:,0,0])
 
             if args.profile:
                 # TQDM

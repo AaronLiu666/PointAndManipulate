@@ -101,6 +101,8 @@ class DataWriter():
                 if self.save_video:
                     stream.release()
                 write_json(final_result, self.opt.outputpath, form=self.opt.format, for_eval=self.opt.eval)
+                print('Called update')
+                print(final_result)
                 print("Results have been written to json.")
                 return
             # image channel RGB->BGR
@@ -180,6 +182,7 @@ class DataWriter():
                     self.write_image(img, im_name, stream=stream if self.save_video else None)
 
     def write_image(self, img, im_name, stream=None):
+        print('called write image')
         if self.opt.vis:
             cv2.imshow("AlphaPose Demo", img)
             cv2.waitKey(30)
@@ -196,7 +199,10 @@ class DataWriter():
 
     def save(self, boxes, scores, ids, hm_data, cropped_boxes, orig_img, im_name):
         # save next frame in the queue
+        print('111')
         self.wait_and_put(self.result_queue, (boxes, scores, ids, hm_data, cropped_boxes, orig_img, im_name))
+        # print(ids)
+        # print(hm_data)
 
     def running(self):
         # indicate that the thread is still running
@@ -213,6 +219,7 @@ class DataWriter():
 
     def terminate(self):
         # directly terminate
+        print('called terminate')
         self.result_worker.terminate()
 
     def clear_queues(self):
@@ -224,7 +231,7 @@ class DataWriter():
 
     def results(self):
         # return final result
-        print(self.final_result)
+        print('called results')
         return self.final_result
 
     def recognize_video_ext(self, ext=''):
