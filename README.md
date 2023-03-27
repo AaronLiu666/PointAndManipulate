@@ -85,3 +85,15 @@ error: when using a `.mp4` file as input, the batch size(default 5) should be sm
 ```bash
  python scripts/demo_inference.py --cfg configs/halpe_coco_wholebody_136/resnet/256x192_res50_lr1e-3_2x-dcn-combined.yaml --checkpoint pretrained_models/multi_domain_fast50_dcn_combined_256x192.pth --video examples/demo/bsktb.mp4 --outdir examples/res/ --save_video --detbatch 1
 ```
+
+2022.3.27
+
+GPU memory burst
+
+check memory use by
+
+```bash
+nvidia-smi
+```
+
+kill all unnecessary PID process
