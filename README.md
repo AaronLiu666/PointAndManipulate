@@ -102,3 +102,13 @@ kill all unnecessary PID process
 watch -n 0.1 -d nvidia-smi #每隔0.1秒刷新一次
 ```
 
+在`writer.py`里， `result`变量是一个存了`image name`和`result`的字典`dict`，这个`result`是长度为1的list，元素为一个`dict`类型元素，这个`dict`长度为5，结构为
+```
+{
+'keypoints': tensor(136x1),
+'kp_score': tensor,
+'proposal_score': tensor,
+'idx': 1x1,
+'box': 1x4
+}
+```
