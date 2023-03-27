@@ -261,7 +261,7 @@ if __name__ == "__main__":
                 hm = hm.cpu()
                 writer.save(boxes, scores, ids, hm, cropped_boxes, orig_img, im_name)
                 # writer.results()
-                print('called saved')
+                # print('called saved')
                 # print(writer.results)
                 if args.profile:
                     ckpt_time, post_time = getTime(ckpt_time)

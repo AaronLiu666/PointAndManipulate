@@ -78,6 +78,7 @@ class DataWriter():
         return self
 
     def update(self):
+        # print('update')
         final_result = []
         norm_type = self.cfg.LOSS.get('NORM_TYPE', None)
         hm_size = self.cfg.DATA_PRESET.HEATMAP_SIZE
@@ -94,6 +95,7 @@ class DataWriter():
             assert stream.isOpened(), 'Cannot open video for writing'
         # keep looping infinitelyd
         while True:
+            # print('update')
             # ensure the queue is not empty and get item
             (boxes, scores, ids, hm_data, cropped_boxes, orig_img, im_name) = self.wait_and_get(self.result_queue)
             if orig_img is None:
@@ -171,6 +173,12 @@ class DataWriter():
                         result['result'][i]['idx'] = poseflow_result[i]['idx']
 
                 final_result.append(result)
+                a = result['result']
+                # print(type(a))
+                b = result['result'][0]
+                
+                
+                
                 if self.opt.save_img or self.save_video or self.opt.vis:
                     if hm_data.size()[1] == 49:
                         from alphapose.utils.vis import vis_frame_dense as vis_frame
@@ -182,7 +190,7 @@ class DataWriter():
                     self.write_image(img, im_name, stream=stream if self.save_video else None)
 
     def write_image(self, img, im_name, stream=None):
-        print('called write image')
+        # print('called write image')
         if self.opt.vis:
             cv2.imshow("AlphaPose Demo", img)
             cv2.waitKey(30)
@@ -199,8 +207,9 @@ class DataWriter():
 
     def save(self, boxes, scores, ids, hm_data, cropped_boxes, orig_img, im_name):
         # save next frame in the queue
-        print('111')
+        # print('111')
         self.wait_and_put(self.result_queue, (boxes, scores, ids, hm_data, cropped_boxes, orig_img, im_name))
+        # print(self.result_queue)
         # print(ids)
         # print(hm_data)
 
