@@ -112,3 +112,5 @@ watch -n 0.1 -d nvidia-smi #每隔0.1秒刷新一次
 'box': 1x4
 }
 ```
+
+[keypoint定义index](https://github.com/Fang-Haoshu/Halpe-FullBody#keypoints-format)
