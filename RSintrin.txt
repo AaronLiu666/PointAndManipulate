@@ -1,0 +1,14 @@
+Please select the desired streaming profile: 84
+
+Principal Point         : 321.863, 248.418
+Focal Length            : 605.918, 604.932
+Distortion Model        : Inverse Brown Conrady
+Distortion Coefficients : [0,0,0,0,0]
+
+Please select the desired streaming profile: 85
+
+Principal Point         : 321.863, 248.418
+Focal Length            : 605.918, 604.932
+Distortion Model        : Inverse Brown Conrady
+Distortion Coefficients : [0,0,0,0,0]
+

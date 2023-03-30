@@ -10,6 +10,7 @@ import torch.multiprocessing as mp
 
 from alphapose.utils.transforms import get_func_heatmap_to_coord
 from alphapose.utils.pPose_nms import pose_nms, write_json
+from alphapose.utils.js_pub import talker
 
 DEFAULT_VIDEO_SAVE_OPT = {
     'savepath': 'examples/res/1.mp4',
@@ -71,6 +72,8 @@ class DataWriter():
         # p.daemon = True
         p.start()
         return p
+    
+    
 
     def start(self):
         # start a thread to read pose estimation results per frame
@@ -173,9 +176,10 @@ class DataWriter():
                         result['result'][i]['idx'] = poseflow_result[i]['idx']
 
                 final_result.append(result)
-                a = result['result']
-                # print(type(a))
-                b = result['result'][0]
+                
+                publish_kp(result)
+                
+                
                 
                 
                 
@@ -240,8 +244,11 @@ class DataWriter():
 
     def results(self):
         # return final result
-        print('called results')
+        # print('called results')
         return self.final_result
+
+    
+
 
     def recognize_video_ext(self, ext=''):
         if ext == 'mp4':
@@ -253,3 +260,17 @@ class DataWriter():
         else:
             print("Unknow video format {}, will use .mp4 instead of it".format(ext))
             return cv2.VideoWriter_fourcc(*'mp4v'), '.mp4'
+
+def publish_kp(result):        
+        kp = result['result'][0]['keypoints']
+        kp_score = result['result'][0]['kp_score']
+        # print('\n'+str(len(kp))+'----------------------------'+str(len(kp_score))+'\n')
+        # print(kp.shape)
+        EB_L = kp[7,:] # left elbow
+        EB_R = kp[8,:] # right elbow
+        WR_L = kp[9,:]
+        WR_R = kp[10,:]
+        # print(type(EB_L))
+        msg = (torch.cat([EB_L ,EB_R,WR_L,WR_R],dim=0))
+        talker(msg)
+        print(msg.shape)
