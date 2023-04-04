@@ -16,7 +16,9 @@ class WebCamDetectionLoader():
         self.cfg = cfg
         self.opt = opt
 
+        # stream = cv2.VideoCapture(0)
         stream = cv2.VideoCapture(int(input_source))
+        print(type(stream))
         assert stream.isOpened(), 'Cannot capture source'
         self.path = input_source
         self.fourcc = int(stream.get(cv2.CAP_PROP_FOURCC))

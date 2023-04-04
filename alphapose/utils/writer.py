@@ -273,4 +273,4 @@ def publish_kp(result):
         # print(type(EB_L))
         msg = (torch.cat([EB_L ,EB_R,WR_L,WR_R],dim=0))
         talker(msg)
-        print(msg.shape)
+        # print(msg.shape)

@@ -25,9 +25,9 @@ from alphapose.utils.writer import DataWriter
 
 """----------------------------- Demo options -----------------------------"""
 parser = argparse.ArgumentParser(description='AlphaPose Demo')
-parser.add_argument('--cfg', type=str, required=True,
+parser.add_argument('--cfg', type=str, default='configs/halpe_coco_wholebody_136/resnet/256x192_res50_lr1e-3_2x-dcn-combined.yaml',
                     help='experiment configure file name')
-parser.add_argument('--checkpoint', type=str, required=True,
+parser.add_argument('--checkpoint', type=str, default='pretrained_models/multi_domain_fast50_dcn_combined_256x192.pth',
                     help='checkpoint file name')
 parser.add_argument('--sp', default=False, action='store_true',
                     help='Use single process for pytorch')
@@ -45,7 +45,7 @@ parser.add_argument('--outdir', dest='outputpath',
                     help='output-directory', default="examples/res/")
 parser.add_argument('--save_img', default=False, action='store_true',
                     help='save result as image')
-parser.add_argument('--vis', default=False, action='store_true',
+parser.add_argument('--vis', default=True, action='store_true',
                     help='visualize image')
 parser.add_argument('--showbox', default=False, action='store_true',
                     help='visualize human bbox')
@@ -161,6 +161,7 @@ def loop():
 
 if __name__ == "__main__":
     mode, input_source = check_input()
+    
 
     if not os.path.exists(args.outputpath):
         os.makedirs(args.outputpath)
