@@ -25,7 +25,8 @@ align = rs.align(align_to)      # rs.align 执行深度帧与其他帧的对齐
 '''
 def get_aligned_images():
     
-    frames = pipeline.wait_for_frames()     # 等待获取图像帧，获取颜色和深度的框架集     
+    frames = pipeline.wait_for_frames()     # 等待获取图像帧，获取颜色和深度的框架集    
+    print(type(frames)) 
     aligned_frames = align.process(frames)      # 获取对齐帧，将深度框与颜色框对齐  
 
     aligned_depth_frame = aligned_frames.get_depth_frame()      # 获取对齐帧中的的depth帧 

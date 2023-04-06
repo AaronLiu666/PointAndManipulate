@@ -11,6 +11,7 @@ import platform
 import sys
 import math
 import time
+import pyrealsense2 as rs
 
 import cv2
 import numpy as np
@@ -135,6 +136,7 @@ class DetectionLoader():
         im_dim = orig_img.shape[1], orig_img.shape[0]
 
         im_name = os.path.basename(im_name)
+        # im_name = 'test.jpeg'
 
         with torch.no_grad():
             im_dim = torch.FloatTensor(im_dim).repeat(1, 2)
@@ -393,7 +395,7 @@ def example():
     demo = SingleImageAlphaPose(args, cfg)
     im_name = args.inputimg    # the path to the target image
     image = cv2.cvtColor(cv2.imread(im_name), cv2.COLOR_BGR2RGB)
-    pose = demo.process(im_name, image)
+    pose = demo.process('another.jpeg', image)
     img = demo.getImg()     # or you can just use: img = cv2.imread(image)
     img = demo.vis(img, pose)   # visulize the pose result
     cv2.imwrite(os.path.join(outputpath, 'vis', os.path.basename(im_name)), img)
@@ -404,7 +406,41 @@ def example():
 
     # write the result to json:
     result = [pose]
+    print(type(pose))
     demo.writeJson(result, outputpath, form=args.format, for_eval=args.eval)
+    
+def js():
+    pipeline = rs.pipeline()
+    config = rs.config()
+    config.enable_stream(rs.stream.color, 640, 480, rs.format.rgb8, 30)
+    config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+    pipeline.start(config)
+    
+    demo = SingleImageAlphaPose(args, cfg)
+    im_name = 'shit.jpeg'
+    try:
+        while True:
+            color_img = pipeline.wait_for_frames()
+            color_img = color_img.get_color_frame()
+            color_img = np.asanyarray(color_img.get_data())
+            image = cv2.cvtColor(color_img, cv2.COLOR_BGR2RGB)
+            pose = demo.process(im_name, image)
+            # print(pose)
+            res = pose['result']
+            keypoint = res[0]
+            keypoint = keypoint['keypoints']
+            print(type(keypoint))
+            print(keypoint.shape)
+            print(keypoint[0:5,:])
+            
+            cv2.imshow('color', color_img)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+    finally:
+        # cleanup
+        pipeline.stop()
+        cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    example()
+    # example()
+    js()
