@@ -12,6 +12,8 @@ import sys
 import math
 import time
 import pyrealsense2 as rs
+import rospy
+from std_msgs.msg import Float32MultiArray
 
 import cv2
 import numpy as np
@@ -27,9 +29,9 @@ from alphapose.utils.vis import getTime
 
 """----------------------------- Demo options -----------------------------"""
 parser = argparse.ArgumentParser(description='AlphaPose Single-Image Demo')
-parser.add_argument('--cfg', type=str, required=True,
+parser.add_argument('--cfg', type=str, default='configs/halpe_coco_wholebody_136/resnet/256x192_res50_lr1e-3_2x-dcn-combined.yaml',
                     help='experiment configure file name')
-parser.add_argument('--checkpoint', type=str, required=True,
+parser.add_argument('--checkpoint', type=str, default='pretrained_models/multi_domain_fast50_dcn_combined_256x192.pth',
                     help='checkpoint file name')
 parser.add_argument('--detector', dest='detector',
                     help='detector name', default="yolo")
@@ -416,6 +418,8 @@ def js():
     config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
     pipeline.start(config)
     
+    
+    
     demo = SingleImageAlphaPose(args, cfg)
     im_name = 'shit.jpeg'
     try:
@@ -428,18 +432,46 @@ def js():
             # print(pose)
             res = pose['result']
             keypoint = res[0]
+            print(len(res))
             keypoint = keypoint['keypoints']
             print(type(keypoint))
-            print(keypoint.shape)
-            print(keypoint[0:5,:])
+            kp = keypoint.numpy()
+            print(type(kp))
+            # print(keypoint.shape)
+            # print(keypoint[0:5,:])
+            print(kp.shape)
+            # print(kp[5,0])
+            # print(kp.shape)
             
+            point = kp[5,:].astype(int)
+            radius = 5
+            color = (0, 0, 255) # BGR format
+            thickness = -1 # Negative thickness fills the circle
+            cv2.circle(color_img, point, radius, color, thickness)
             cv2.imshow('color', color_img)
+            if isinstance(kp, np.ndarray):
+                talker(kp[1:4,:].flatten().tolist())
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
+            
     finally:
         # cleanup
         pipeline.stop()
         cv2.destroyAllWindows()
+        
+def talker(coord):
+    # initialize node and publisher
+    rospy.init_node('coor_publisher')
+    pub = rospy.Publisher('/coordinates_2D', Float32MultiArray, queue_size=10)
+
+    # create message
+    msg = Float32MultiArray()
+    msg.data = coord
+
+    # publish message
+    # while not rospy.is_shutdown():
+    pub.publish(msg)
+    # pub.publish(msg)
 
 if __name__ == "__main__":
     # example()

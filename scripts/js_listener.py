@@ -15,7 +15,7 @@ def callback(data):
     
 def listener():
     rospy.init_node('listener', anonymous=True)
-    rospy.Subscriber('/tensor_coordinates', Float32MultiArray, callback, queue_size=10)
+    rospy.Subscriber('/coordinates_2D', Float32MultiArray, callback, queue_size=10)
     rospy.spin()
     
 if __name__ == '__main__':
