@@ -26,6 +26,7 @@ from alphapose.models import builder
 from alphapose.utils.config import update_config
 from detector.apis import get_detector
 from alphapose.utils.vis import getTime
+# from scripts.twoD2threeD import get_3d_camera_coordinate, get_aligned_images
 
 """----------------------------- Demo options -----------------------------"""
 parser = argparse.ArgumentParser(description='AlphaPose Single-Image Demo')
@@ -366,7 +367,7 @@ class SingleImageAlphaPose():
                     'det time: {dt:.4f} | pose time: {pt:.4f} | post processing: {pn:.4f}'.format(
                         dt=np.mean(runtime_profile['dt']), pt=np.mean(runtime_profile['pt']), pn=np.mean(runtime_profile['pn']))
                 )
-            print('===========================> Finish Model Running.')
+            # print('===========================> Finish Model Running.')
         except Exception as e:
             print(repr(e))
             print('An error as above occurs when processing the images, please check it')
@@ -411,67 +412,174 @@ def example():
     print(type(pose))
     demo.writeJson(result, outputpath, form=args.format, for_eval=args.eval)
     
+def get_needed_points(kp):
+    # select needed keypoints from all kp
+    if torch.is_tensor(kp):
+        kpn = kp.numpy()
+    elif type(kp) == list or type(kp) == tuple:
+        kpn = np.array(kp)
+    else:
+        print('Not acceptable type.')
+        return
+    
+    LE, RE, LW, RW = kpn[7:11,:]
+    kp_need = kpn[7:11,:]
+    return kp_need
+
+def get_aligned_images(align, pipeline):
+    
+    frames = pipeline.wait_for_frames()     
+    aligned_frames = align.process(frames)      
+
+    aligned_depth_frame = aligned_frames.get_depth_frame()      
+    aligned_color_frame = aligned_frames.get_color_frame()      
+
+    #### 获取相机参数 ####
+    depth_intrin = aligned_depth_frame.profile.as_video_stream_profile().intrinsics     
+    # color_intrin = aligned_color_frame.profile.as_video_stream_profile().intrinsics     
+
+
+    #### 将images转为numpy arrays ####  
+    img_color = np.asanyarray(aligned_color_frame.get_data())       # RGB图  
+    img_depth = np.asanyarray(aligned_depth_frame.get_data())       # 深度图（默认16位）
+
+    return depth_intrin, img_color, img_depth, aligned_depth_frame
+
+def visualize(points, color_img):
+    radius = 3
+    color = (0, 0, 255) # BGR format
+    thickness = -1 # Negative thickness fills the circle
+    for point in points:
+        cv2.circle(color_img, point, radius, color, thickness)
+
+def get_3d_camera_coordinate(points, aligned_depth_frame, depth_intrin):
+    camera_coordinates = []
+    for point in points:
+        camera_coordinates.append(rs.rs2_deproject_pixel_to_point(depth_intrin, point, aligned_depth_frame.get_distance(point[0], point[1])))
+    return camera_coordinates
+
+def transform_coordinate(coord, transform_matrix):
+    """
+    将3x1坐标向量应用4x4变换矩阵，返回转换后的3x1坐标向量
+    :param coord: 3x1坐标向量
+    :param transform_matrix: 4x4变换矩阵
+    :return: 转换后的3x1坐标向量
+    """
+    # 将3x1坐标向量扩展为4x1齐次坐标
+    coord_homogeneous = np.vstack((coord, 1))
+
+    # 应用变换矩阵
+    transformed_coord_homogeneous = np.dot(transform_matrix, coord_homogeneous)
+
+    # 将齐次坐标还原为3x1坐标向量
+    transformed_coord = transformed_coord_homogeneous[:3] / transformed_coord_homogeneous[3]
+
+    return transformed_coord
+
+def transform_coordinates(coords, transform_matrix):
+    """
+    将二维坐标数组应用4x4变换矩阵，返回转换后的坐标数组
+    :param coords: n*2的坐标数组
+    :param transform_matrix: 4x4变换矩阵
+    :return: 转换后的坐标数组
+    """
+    # 将二维坐标数组扩展为n*3的齐次坐标数组
+    coords_homogeneous = np.hstack((coords, np.ones((len(coords), 1))))
+
+    # 应用变换矩阵
+    transformed_coords_homogeneous = np.dot(transform_matrix, coords_homogeneous.T).T
+
+    # 将齐次坐标还原为二维坐标
+    transformed_coords = transformed_coords_homogeneous[:, :-1] / transformed_coords_homogeneous[:, -1].reshape(-1, 1)
+
+    return transformed_coords
+
+def generate_transform_matrix(coords_after, translation):
+    """
+    根据变换后坐标系的单位向量在原坐标系下的表示和平移向量，生成4x4的变换矩阵
+    :param coords_after: 变换后坐标系单位向量在原坐标系下的表示，3x3的旋转矩阵
+    :param translation: 平移向量，4x1的列向量，其中第4个元素为1
+    :return: 4x4的变换矩阵
+    """
+    # 构造变换矩阵
+    transform_matrix = np.vstack((np.hstack((coords_after, translation[:3])), np.array([0, 0, 0, 1])))
+
+    return transform_matrix
+    
 def js():
     pipeline = rs.pipeline()
     config = rs.config()
     config.enable_stream(rs.stream.color, 640, 480, rs.format.rgb8, 30)
     config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
     pipeline.start(config)
+    align_to = rs.stream.color      
+    align = rs.align(align_to)
+    x_u = [1,0,0]
+    y_u = [0,0,1]
+    z_u = [0,-1,0]
+    trans = [[0],[0],[1.32],[1]]
+    
+    transform_matrix = generate_transform_matrix([x_u,y_u,z_u],trans)
     
     
     
     demo = SingleImageAlphaPose(args, cfg)
-    im_name = 'shit.jpeg'
+    im_name = 'ljs_img.jpeg'
+    rospy.init_node('ljs')
+    coord_pub = rospy.Publisher('/coords', Float32MultiArray, queue_size=10)
+    rate = rospy.Rate(10)
+    
+
     try:
         while True:
-            color_img = pipeline.wait_for_frames()
-            color_img = color_img.get_color_frame()
-            color_img = np.asanyarray(color_img.get_data())
+            
+            depth_intrin, img_color, _, aligned_depth_frame = get_aligned_images(align, pipeline)        # 获取对齐图像与相机参数
+            depth_pixel = [320, 240]        
+            
+
+            color_img = np.asanyarray(img_color)
             image = cv2.cvtColor(color_img, cv2.COLOR_BGR2RGB)
             pose = demo.process(im_name, image)
-            # print(pose)
-            res = pose['result']
-            keypoint = res[0]
-            print(len(res))
-            keypoint = keypoint['keypoints']
-            print(type(keypoint))
-            kp = keypoint.numpy()
-            print(type(kp))
-            # print(keypoint.shape)
-            # print(keypoint[0:5,:])
-            print(kp.shape)
-            # print(kp[5,0])
-            # print(kp.shape)
-            
-            point = kp[5,:].astype(int)
-            radius = 5
-            color = (0, 0, 255) # BGR format
-            thickness = -1 # Negative thickness fills the circle
-            cv2.circle(color_img, point, radius, color, thickness)
             cv2.imshow('color', color_img)
-            if isinstance(kp, np.ndarray):
-                talker(kp[1:4,:].flatten().tolist())
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+            # print(pose)
+            if pose is not None:
+                res = pose['result']
+                keypoint = res[0] # choose the first people recognized, may changing if multiple detected
+                # print(len(res)) # number of people recognized
+                keypoint = keypoint['keypoints']
+                # print(type(keypoint)) # tensor
+                # kp = keypoint.numpy()
+                # print(type(kp)) # ndarray
+                # print(keypoint.shape)
+                # print(keypoint[0:5,:])
+                # print(kp.shape) # (136,2) coordinates of 136 keypoints
+                kp = get_needed_points(keypoint)
+                camera_coordinates = get_3d_camera_coordinate(kp, aligned_depth_frame, depth_intrin)
+                world_coordinates = transform_coordinates(camera_coordinates, transform_matrix)
+                print(world_coordinates)
+                coord_msg = Float32MultiArray()
+                coord_msg.data = world_coordinates.flatten().tolist()
+                coord_pub.publish(coord_msg)
+                rate.sleep()
+                
+                print(world_coordinates)
+                visualize(kp.astype(int), color_img)
+                cv2.imshow('color', color_img)
+          
+
+
+                # end program
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
             
     finally:
         # cleanup
         pipeline.stop()
         cv2.destroyAllWindows()
+    
         
-def talker(coord):
-    # initialize node and publisher
-    rospy.init_node('coor_publisher')
-    pub = rospy.Publisher('/coordinates_2D', Float32MultiArray, queue_size=10)
+        
 
-    # create message
-    msg = Float32MultiArray()
-    msg.data = coord
-
-    # publish message
-    # while not rospy.is_shutdown():
-    pub.publish(msg)
-    # pub.publish(msg)
 
 if __name__ == "__main__":
     # example()
