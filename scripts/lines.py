@@ -42,7 +42,7 @@ if __name__ == '__main__':
     rospy.init_node('line_strip_visualizer')
 
     # Set up ROS publisher for marker topic
-    marker_pub = rospy.Publisher('/marker_topic', Marker, queue_size=10)
+    marker_pub = rospy.Publisher('/lines', Marker, queue_size=10)
 
     # Set up ROS subscriber for point pairs topic
     point_sub = rospy.Subscriber('/coords', Float32MultiArray, point_pairs_cb)

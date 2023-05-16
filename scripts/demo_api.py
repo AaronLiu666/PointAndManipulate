@@ -455,7 +455,12 @@ def visualize(points, color_img):
 def get_3d_camera_coordinate(points, aligned_depth_frame, depth_intrin):
     camera_coordinates = []
     for point in points:
-        camera_coordinates.append(rs.rs2_deproject_pixel_to_point(depth_intrin, point, aligned_depth_frame.get_distance(point[0], point[1])))
+        if point[0]>640: point[0]=640 
+        elif point[0]<2: point[0]=1
+        if point[1]>480: point[1] = 480 
+        elif point[1]<2: point[1]=1
+        camera_coordinates.append(rs.rs2_deproject_pixel_to_point(depth_intrin, point, aligned_depth_frame.get_distance(int(point[0]-1), int(point[1]-1))))
+        # camera_coordinates.append(rs.rs2_deproject_pixel_to_point(depth_intrin, point, aligned_depth_frame.get_distance(0,0)))
     return camera_coordinates
 
 def transform_coordinate(coord, transform_matrix):
@@ -540,7 +545,7 @@ def js():
             color_img = np.asanyarray(img_color)
             image = cv2.cvtColor(color_img, cv2.COLOR_BGR2RGB)
             pose = demo.process(im_name, image)
-            cv2.imshow('color', color_img)
+            cv2.imshow('color', image)
             # print(pose)
             if pose is not None:
                 res = pose['result']
@@ -554,18 +559,20 @@ def js():
                 # print(keypoint[0:5,:])
                 # print(kp.shape) # (136,2) coordinates of 136 keypoints
                 kp = get_needed_points(keypoint)
+                # print(kp)
                 camera_coordinates = get_3d_camera_coordinate(kp, aligned_depth_frame, depth_intrin)
                 world_coordinates = transform_coordinates(camera_coordinates, transform_matrix)
                 print(world_coordinates)
                 coord_msg = Float32MultiArray()
                 coord_msg.data = world_coordinates.flatten().tolist()
                 coord_pub.publish(coord_msg)
-                rate.sleep()
                 
-                print(world_coordinates)
-                visualize(kp.astype(int), color_img)
-                cv2.imshow('color', color_img)
-          
+                
+                # print(world_coordinates)
+                visualize(kp.astype(int), image)
+                
+                cv2.imshow('color', image)
+                rate.sleep()
 
 
                 # end program
