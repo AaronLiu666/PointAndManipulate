@@ -11,7 +11,7 @@ def callback(data):
     points = [tuple(data.data[i:i+3]) for i in range(0, len(data.data), 3)]
 
     # Set up PointCloud2 message
-    header = rospy.Header(frame_id='world')
+    header = rospy.Header(frame_id='map')
     fields = [point_cloud2.PointField(name='x', offset=0, datatype=7, count=1),
               point_cloud2.PointField(name='y', offset=4, datatype=7, count=1),
               point_cloud2.PointField(name='z', offset=8, datatype=7, count=1)]
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     pub = rospy.Publisher('my_point_cloud_topic', PointCloud2, queue_size=10)
 
     # Define subscriber
-    sub = rospy.Subscriber('coords', Float32MultiArray, callback)
+    sub = rospy.Subscriber('filtered_coords', Float32MultiArray, callback)
 
     # Spin until node is stopped
     rospy.spin()

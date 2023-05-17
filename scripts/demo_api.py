@@ -562,7 +562,7 @@ def js():
                 # print(kp)
                 camera_coordinates = get_3d_camera_coordinate(kp, aligned_depth_frame, depth_intrin)
                 world_coordinates = transform_coordinates(camera_coordinates, transform_matrix)
-                print(world_coordinates)
+                # print(world_coordinates)
                 coord_msg = Float32MultiArray()
                 coord_msg.data = world_coordinates.flatten().tolist()
                 coord_pub.publish(coord_msg)
